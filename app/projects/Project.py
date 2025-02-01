@@ -18,3 +18,8 @@ class Project(object):
         self.running = len(main.client.containers.list(filters={'name': project_id})) > 0
         self.built = len(main.client.images.list(filters={'reference': project_id})) > 0
         self.env_vars = dotenv_values(os.path.join(self.project_path, '.env'))
+
+        cursor = main.connection.cursor()
+        cursor.execute('INSERT INTO projects (id, port, domain) VALUES (?, ?, ?)', [self.project_id, 3000, 'localhost'])
+        main.connection.commit()
+        cursor.close()

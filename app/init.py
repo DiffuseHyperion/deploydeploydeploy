@@ -53,6 +53,7 @@ def initialize_traefik():
     )
 
 def initialize_database():
-    cur = main.connection.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, port INTEGER, domain TEXT)")
+    cursor = main.connection.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, port INTEGER, domain TEXT)")
+    cursor.close()
 
