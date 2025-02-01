@@ -1,10 +1,13 @@
 from typing import List
-from shutil import which
-from os import listdir
+import shutil
+import os
+import warnings
+import uuid
 
 import app.main as main
 from app.lib.environment import PROJECT_DIR, TRAEFIK_NAME, TRAEFIK_NETWORK, TRAEFIK_VOLUME
 from app.projects.Project import Project
+from app.lib import git
 
 REQUIRED_PROGRAMS: List[str] = [
     "git",
@@ -14,14 +17,53 @@ REQUIRED_PROGRAMS: List[str] = [
 def check_programs() -> List[str]:
     missing_programs: List[str] = []
     for program in REQUIRED_PROGRAMS:
-        if which(program) is None:
+        if shutil.which(program) is None:
             missing_programs.append(program)
     return missing_programs
 
+def synchronize_projects():
+    """
+    Attempt to fix any de-synchronization between the projects in the database and the project files on disk.
+    If a project is found in the database but not on disk, the project will be cloned again
+    If a project is found on disk but not in the database, the project will be added into the database
+    :return:
+    """
+    cursor = main.connection.cursor()
+    db_ids = [id_tuple[0] for id_tuple in cursor.execute("SELECT id FROM projects").fetchall()]
+
+    path_ids = []
+    for project_id in os.listdir(PROJECT_DIR):
+        try:
+            uuid.UUID(project_id, version=4)
+        except ValueError:
+            warnings.warn("A folder named an invalid project ID was found within the projects directory. Skipping.")
+            continue
+        project_path = os.path.join(PROJECT_DIR, project_id)
+        if not os.path.exists(os.path.join(project_path, ".git")):
+            warnings.warn(f"A project folder with the id {project_id} is not a git repository. Skipping.")
+            continue
+
+        path_ids.append(project_id)
+        if project_id not in db_ids:
+            warnings.warn(f"A project folder with the ID {project_id} is not in the database. Adding it to the database now.")
+            exit_code, output = git.get_remote(project_path)
+            if exit_code != 0:
+                warnings.warn(f"Could not find the remote url to project {project_id}. Assuming there is no remote.")
+                output = None
+            cursor.execute('INSERT INTO projects (id, git_url, port, domain) VALUES (?, ?, ?, ?)',
+                           [project_id, output, 3000, 'localhost'])
+    main.connection.commit()
+
+    for db_id in db_ids:
+        if db_id not in path_ids:
+            warnings.warn(f"Could not find project {db_id}'s files. Cloning it now.")
+            git_url = cursor.execute("SELECT git_url FROM projects WHERE id = ?", [db_id]).fetchone()[0]
+            git.clone_repo(git_url, str(os.path.join(PROJECT_DIR, db_id)))
+
+
 def create_projects() -> dict[str, Project]:
     projects: dict[str, Project] = {}
-    for name in listdir(PROJECT_DIR):
-        print(f"Imported project {name}")
+    for name in os.listdir(PROJECT_DIR):
         projects.update({name: Project(name)})
     return projects
 
@@ -54,6 +96,6 @@ def initialize_traefik():
 
 def initialize_database():
     cursor = main.connection.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, port INTEGER, domain TEXT)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, git_url TEXT, port INTEGER, domain TEXT)")
     cursor.close()
 
