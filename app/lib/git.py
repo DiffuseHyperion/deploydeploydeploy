@@ -1,5 +1,4 @@
-import shutil
-import subprocess
+import shutil, subprocess
 
 GIT_PATH = shutil.which('git')
 

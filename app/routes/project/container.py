@@ -1,7 +1,7 @@
 from fastapi import Response, APIRouter, Depends, status
 
-import app.routes.dependencies as dependencies
-import app.main as main
+import app.lib.dependencies as dependencies
+from app import main
 
 router = APIRouter(
     prefix="/api/v1/{project_id}/container",

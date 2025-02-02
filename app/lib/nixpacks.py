@@ -1,5 +1,4 @@
-import shutil
-import subprocess
+import shutil, subprocess
 
 NIXPACK_PATH = shutil.which('nixpacks')
 

@@ -1,14 +1,12 @@
-import uuid
-import os
+import uuid, os
 
 from fastapi import Response, APIRouter, Depends, status
 from pydantic import BaseModel
 
 from app.lib.environment import PROJECT_DIR
-import app.routes.dependencies as dependencies
-import app.lib.git as git
-import app.main as main
+from app.lib import git, dependencies
 from app.projects.Project import Project
+from app import main
 
 router = APIRouter(
     prefix="/api/v1/projects",
@@ -37,3 +35,7 @@ async def create_project(
         return {
             "project_uuid": project_uuid,
         }
+
+@router.get("/")
+async def get_projects():
+    return main.projects
