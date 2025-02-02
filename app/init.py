@@ -3,6 +3,7 @@ import shutil
 import os
 import warnings
 import uuid
+import dotenv
 
 import app.main as main
 from app.lib.environment import PROJECT_DIR, TRAEFIK_NAME, TRAEFIK_NETWORK, TRAEFIK_VOLUME
@@ -15,6 +16,10 @@ REQUIRED_PROGRAMS: List[str] = [
 ]
 
 def check_programs() -> List[str]:
+    """
+    Checks if all required programs are installed.
+    :return: Names of required programs that are not installed.
+    """
     missing_programs: List[str] = []
     for program in REQUIRED_PROGRAMS:
         if shutil.which(program) is None:
@@ -26,7 +31,6 @@ def synchronize_projects():
     Attempt to fix any de-synchronization between the projects in the database and the project files on disk.
     If a project is found in the database but not on disk, the project will be cloned again
     If a project is found on disk but not in the database, the project will be added into the database
-    :return:
     """
     cursor = main.connection.cursor()
     db_ids = [id_tuple[0] for id_tuple in cursor.execute("SELECT id FROM projects").fetchall()]
@@ -50,8 +54,11 @@ def synchronize_projects():
             if exit_code != 0:
                 warnings.warn(f"Could not find the remote url to project {project_id}. Assuming there is no remote.")
                 output = None
-            cursor.execute('INSERT INTO projects (id, git_url, port, domain) VALUES (?, ?, ?, ?)',
-                           [project_id, output, 3000, 'localhost'])
+            cursor.execute("INSERT INTO projects (id, git_url, port, domain) VALUES (?, ?, ?, ?)",
+                           [project_id, output, 3000, "localhost"])
+            env_vars = dotenv.dotenv_values(os.path.join(project_path, ".env"))
+            for key, value in env_vars.items():
+                cursor.execute("INSERT INTO environments (id, key, value) VALUES (?, ?, ?)", [project_id, key, value])
     main.connection.commit()
 
     for db_id in db_ids:
@@ -59,15 +66,28 @@ def synchronize_projects():
             warnings.warn(f"Could not find project {db_id}'s files. Cloning it now.")
             git_url = cursor.execute("SELECT git_url FROM projects WHERE id = ?", [db_id]).fetchone()[0]
             git.clone_repo(git_url, str(os.path.join(PROJECT_DIR, db_id)))
-
+            env_vars = cursor.execute("SELECT key, value FROM environments WHERE id = ?", [db_id]).fetchall()
+            env_path = os.path.join(PROJECT_DIR, db_id, ".env")
+            if len(env_vars) > 0 and not os.path.exists(env_path):
+                with open(env_path, "w") as _:
+                    pass
+            for key, value in env_vars:
+                dotenv.set_key(str(env_path), key, value)
 
 def create_projects() -> dict[str, Project]:
+    """
+    Returns a dictionary of all project ids to a Project object.
+    :return:
+    """
     projects: dict[str, Project] = {}
     for name in os.listdir(PROJECT_DIR):
         projects.update({name: Project(name)})
     return projects
 
 def initialize_traefik():
+    """
+    Initializes the traefik container, network and volume, based on environment variables.
+    """
     if len(main.client.containers.list(filters={"name": TRAEFIK_NAME})) > 0:
         return
     print("Initializing traefik")
@@ -87,7 +107,7 @@ def initialize_traefik():
             "--providers.docker=true",
             "--entrypoints.http.address=:80",
         ],
-        ports={'80/tcp': 80},
+        ports={"80/tcp": 80},
         volumes=[
             "/var/run/docker.sock:/var/run/docker.sock",
             f"{TRAEFIK_VOLUME}:/traefik"
@@ -95,7 +115,11 @@ def initialize_traefik():
     )
 
 def initialize_database():
+    """
+    Creates database tables if they don't exist.
+    """
     cursor = main.connection.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, git_url TEXT, port INTEGER, domain TEXT)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS environments(id TEXT, key TEXT, value TEXT, FOREIGN KEY (id) REFERENCES projects(id) PRIMARY KEY (id, key))")
     cursor.close()
 

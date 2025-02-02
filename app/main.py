@@ -16,7 +16,6 @@ import app.init as init
 
 if len(result := init.check_programs()) > 0:
     raise RuntimeError(f"The following programs are not installed: {", ".join(result)}")
-
 init.initialize_database()
 init.synchronize_projects()
 projects: dict[str, Project] = init.create_projects()
@@ -26,10 +25,10 @@ from app.routes.api.v1.projects.post import router as post_projects
 from app.routes.api.v1.projects.get import router as get_projects
 from app.routes.api.v1.project.get import router as get_project_info
 from app.routes.api.v1.project.delete import router as delete_project
-from app.routes.api.v1.project.environment.post import router as set_project_env_var
+from app.routes.api.v1.project.environment.put import router as set_project_env_var
 from app.routes.api.v1.project.environment.delete import router as delete_project_env_var
 from app.routes.api.v1.project.image.delete import router as delete_project_image
-from app.routes.api.v1.project.image.post import router as build_project_image
+from app.routes.api.v1.project.image.put import router as build_project_image
 from app.routes.api.v1.project.container.post import router as create_project_container
 
 app.include_router(post_projects)

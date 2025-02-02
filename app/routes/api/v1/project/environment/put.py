@@ -2,7 +2,7 @@ import os.path
 
 from fastapi import Response, APIRouter, Depends, status
 from pydantic import BaseModel
-from dotenv import set_key
+import dotenv
 
 import app.routes.dependencies as dependencies
 import app.main as main
@@ -16,7 +16,7 @@ class SetProjectEnvironmentVariableModel(BaseModel):
     key: str
     value: str
 
-@router.post("/")
+@router.put("/")
 async def set_project_env_variable(
         project_id: str,
         body: SetProjectEnvironmentVariableModel,
@@ -25,9 +25,10 @@ async def set_project_env_variable(
     if (project := main.projects.get(project_id)) is None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return f"Could not find project {project_id}"
-
-    set_key(os.path.join(project.project_path, ".env"), body.key, body.value)
-    project.env_vars.update({body.key: body.value})
+    cursor = main.connection.cursor()
+    dotenv.set_key(os.path.join(project.project_path, ".env"), body.key, body.value)
+    cursor.execute("INSERT into environments VALUES (?, ?, ?) ON CONFLICT (id, key) DO UPDATE SET value = ?", (project_id, body.key, body.value, body.value))
+    main.connection.commit()
     return {
         "key": body.key,
         "value": body.value,

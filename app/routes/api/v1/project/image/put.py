@@ -10,7 +10,7 @@ router = APIRouter(
     dependencies=[Depends(dependencies.get_key)],
 )
 
-@router.post("/")
+@router.put("/")
 async def create_image(
         project_id: str,
         response: Response,
