@@ -26,4 +26,4 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: git.diffusehyperion.com/DiffuseHyperion/deploydeploydeploy:latest
+          tags: git.diffusehyperion.com/diffusehyperion/deploydeploydeploy:latest
