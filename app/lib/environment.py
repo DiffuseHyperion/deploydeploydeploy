@@ -11,6 +11,8 @@ SECRET_KEY = assert_env("SECRET_KEY")
 TRAEFIK_NAME = assert_env("TRAEFIK_NAME")
 TRAEFIK_NETWORK = assert_env("TRAEFIK_NETWORK")
 TRAEFIK_VOLUME = assert_env("TRAEFIK_VOLUME")
-TRAEFIK_EMAIL = assert_env("TRAEFIK_EMAIL")
-TRAEFIK_CERTS = assert_env("TRAEFIK_CERTS")
-TRAEFIK_STAGING = os.getenv("TRAEFIK_STAGING", "false").lower() == "true"
+
+TRAEFIK_HTTPS = os.getenv("TRAEFIK_HTTPS", "false").lower() == "true"
+TRAEFIK_EMAIL = (assert_env("TRAEFIK_EMAIL") if TRAEFIK_HTTPS else None)
+TRAEFIK_CERTS = (assert_env("TRAEFIK_CERTS") if TRAEFIK_HTTPS else None)
+TRAEFIK_STAGING = (os.getenv("TRAEFIK_STAGING", "false").lower() == "true" if TRAEFIK_HTTPS else None)
