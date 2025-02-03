@@ -1,0 +1,46 @@
+services:
+  deploydeploydeploy:
+    image: git.diffusehyperion.com/diffusehyperion/deploydeploydeploy:latest
+    container_name: deploy*3
+    restart: unless-stopped
+    environment:
+      TRAEFIK_NETWORK: deploy*3
+      TRAEFIK_HTTP_ENTRYPOINT: http
+      TRAEFIK_HTTPS_ENTRYPOINT: https
+      TRAEFIK_CERTRESOLVER: letsencrypt
+      DATA_FILE: /deploy*3/data.sqlite
+      PROJECT_DIR: /deploy*3/projects
+      SECRET_KEY: CHANGEME
+    ports:
+      - "8080:8080"
+    volumes:
+      - "deploy*3_data:/deploy*3"
+  traefik:
+    image: traefik:latest
+    container_name: deploy*3-traefik
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true",
+      - "--entrypoints.http.address=:80",
+      - "--entrypoints.https.address=:443",
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true",
+      - "--certificatesresolvers.letsencrypt.acme.email=CHANGEME@example.com",
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json",
+      # - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock",
+      - "deploy*3-traefik_data:/traefik",
+      - "deploy*3-traefik_certs:/letsencrypt"
+networks:
+  default:
+    name: deploy*3
+volumes:
+  deploy*3_data:
+    name: deploy*3_data
+  deploy*3-traefik_data:
+    name: deploy*3-traefik_data
+  deploy*3-traefik_certs:
+    name: deploy*3-traefik_certs

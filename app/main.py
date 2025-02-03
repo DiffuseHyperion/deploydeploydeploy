@@ -19,7 +19,6 @@ if len(result := init.check_programs()) > 0:
 init.initialize_database()
 init.synchronize_projects()
 projects: dict[str, Project] = init.create_projects()
-init.initialize_traefik()
 
 from app import routes
 app.include_router(routes.projects.router)

@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir --upgrade -r /deploydeploydeploy/requirements.txt
 COPY ./app /deploydeploydeploy/app
 
 WORKDIR /deploydeploydeploy
-CMD ["fastapi", "run", "app/main.py", "--port", "80"]
+CMD ["fastapi", "run", "app/main.py", "--port", "8080"]
