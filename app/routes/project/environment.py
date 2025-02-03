@@ -16,7 +16,7 @@ class SetProjectEnvironmentVariableModel(BaseModel):
     value: str
 
 @router.put("/")
-async def set_project_env_variable(
+async def set_project_environment_variable(
         project_id: str,
         body: SetProjectEnvironmentVariableModel,
         response: Response,
@@ -38,7 +38,7 @@ class DeleteProjectEnvironmentVariableModel(BaseModel):
     key: str
 
 @router.delete("/")
-async def delete_project_env_variable(
+async def delete_project_environment_variable(
         project_id: str,
         body: DeleteProjectEnvironmentVariableModel,
         response: Response,

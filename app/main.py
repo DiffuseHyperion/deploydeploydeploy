@@ -4,6 +4,8 @@ import sqlite3
 
 from app.lib.environment import DATA_FILE, ENABLE_DOCS
 app = FastAPI(
+    title="deploydeploydeploy",
+    summary="A lightweight continuous deployment app made to be adaptable to existing server environments.",
     docs_url=("/docs" if ENABLE_DOCS else None),
     redoc_url=("/redoc" if ENABLE_DOCS else None),
 )
