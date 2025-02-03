@@ -1,6 +1,8 @@
 services:
   deploydeploydeploy:
-    image: git.diffusehyperion.com/diffusehyperion/deploydeploydeploy:dev
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: deploydeploydeploy
     restart: unless-stopped
     environment:
