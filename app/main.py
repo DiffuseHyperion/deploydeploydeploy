@@ -2,8 +2,11 @@ import docker
 from fastapi import FastAPI
 import sqlite3
 
-from app.lib.environment import DATA_FILE
-app = FastAPI()
+from app.lib.environment import DATA_FILE, ENABLE_DOCS
+app = FastAPI(
+    docs_url=("/docs" if ENABLE_DOCS else None),
+    redoc_url=("/redoc" if ENABLE_DOCS else None),
+)
 connection = sqlite3.connect(DATA_FILE)
 client: docker.DockerClient
 try:

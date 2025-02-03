@@ -5,6 +5,7 @@ def assert_env(name):
         raise RuntimeError(f"Environment variable {name} is not set")
     return env
 
+ENABLE_DOCS = os.getenv("ENABLE_DOCS", "false").lower() == "true"
 PROJECT_DIR = os.getenv("PROJECT_DIR", os.path.join("/", "projects"))
 DATA_FILE = os.getenv("DATA_FILE", os.path.join("/", "data.sqlite"))
 SECRET_KEY = assert_env("SECRET_KEY")

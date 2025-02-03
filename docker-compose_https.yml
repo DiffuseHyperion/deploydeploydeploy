@@ -11,6 +11,7 @@ services:
       DATA_FILE: /deploy*3/data.sqlite
       PROJECT_DIR: /deploy*3/projects
       SECRET_KEY: CHANGEME
+      # ENABLE_DOCS: true
     ports:
       - "8080:8080"
     volumes:

@@ -6,6 +6,7 @@ services:
     container_name: deploydeploydeploy
     restart: unless-stopped
     environment:
+      ENABLE_DOCS: true
       TRAEFIK_NETWORK: deploy*3
       TRAEFIK_HTTP_ENTRYPOINT: http
       DATA_FILE: /deploy*3/data.sqlite
