@@ -4,7 +4,7 @@ A lightweight continuous deployment app made to be adaptable to existing server 
 
 Built with [FastAPI](https://fastapi.tiangolo.com/) and [Nixpacks](https://nixpacks.com/docs).
 
-## Installation:
+## Installation
 
 Example Docker Compose stacks can be found within the repository. 
 
@@ -12,7 +12,7 @@ Example Docker Compose stacks can be found within the repository.
 
 You will need to generate a secret key to interact with the API. Generate a random string with `openssl rand -hex 16`
 
-## Documentation:
+## Documentation
 
 You will need to enable docs by setting the environment variable `ENABLE_DOCS` to `true`.
 Afterward, you can find the docs at `/docs` and `/redoc`.
