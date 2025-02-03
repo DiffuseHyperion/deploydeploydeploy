@@ -1,6 +1,6 @@
 services:
   deploydeploydeploy:
-    image: git.diffusehyperion.com/diffusehyperion/deploydeploydeploy:latest
+    image: git.diffusehyperion.com/diffusehyperion/deploydeploydeploy:dev
     container_name: deploydeploydeploy
     restart: unless-stopped
     environment:
@@ -13,24 +13,19 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "deploy*3_data:/deploy*3"
+      - "./run:/deploy*3"
   traefik:
     image: traefik:latest
     container_name: deploydeploydeploy-traefik
     restart: unless-stopped
     command:
       - "--providers.docker=true"
-      - "--entrypoints.http.address=:80"
+      - "-entrypoints.http.address=:80"
     ports:
       - "80:80"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "deploy*3-traefik_data:/traefik"
+      - "./run/traefik:/traefik"
 networks:
   default:
     name: deploy*3
-volumes:
-  deploy*3_data:
-    name: deploy*3_data
-  deploy*3-traefik_data:
-    name: deploy*3-traefik_data

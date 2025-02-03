@@ -6,8 +6,7 @@ import uuid
 import dotenv
 
 import app.main as main
-from app.lib.environment import PROJECT_DIR, TRAEFIK_NAME, TRAEFIK_NETWORK, TRAEFIK_VOLUME, TRAEFIK_EMAIL, \
-    TRAEFIK_CERTS, TRAEFIK_STAGING, TRAEFIK_HTTPS
+from app.lib.environment import PROJECT_DIR
 from app.projects.Project import Project
 from app.lib import git
 
