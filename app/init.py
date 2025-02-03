@@ -6,7 +6,7 @@ import uuid
 import dotenv
 
 import app.main as main
-from app.lib.environment import PROJECT_DIR, TRAEFIK_NAME, TRAEFIK_NETWORK, TRAEFIK_VOLUME
+from app.lib.environment import PROJECT_DIR, TRAEFIK_NAME, TRAEFIK_NETWORK, TRAEFIK_VOLUME, TRAEFIK_EMAIL, TRAEFIK_CERTS, TRAEFIK_STAGING
 from app.projects.Project import Project
 from app.lib import git
 
@@ -98,6 +98,8 @@ def initialize_traefik():
     if len(main.client.networks.list(filters={"name": TRAEFIK_NETWORK})) <= 0:
         print("Creating traefik network")
         main.client.networks.create(TRAEFIK_NETWORK)
+    if TRAEFIK_STAGING:
+        warnings.warn("TRAEFIK_STAGING was set to true. Traefik will use Let's Encrypt staging environment.")
     main.client.containers.run(
         image="traefik:latest",
         name=TRAEFIK_NAME,
@@ -107,11 +109,22 @@ def initialize_traefik():
         command=[
             "--providers.docker=true",
             "--entrypoints.http.address=:80",
+            "--entrypoints.https.address=:443",
+            "--certificatesresolvers.letsencrypt.acme.tlschallenge=true",
+            f"--certificatesresolvers.letsencrypt.acme.email={TRAEFIK_EMAIL}",
+            "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json",
+            f"--certificatesresolvers.letsencrypt.acme.caserver={
+                ("https://acme-staging-v02.api.letsencrypt.org/directory" if TRAEFIK_STAGING 
+                 else "https://acme-v02.api.letsencrypt.org/directory")}",
         ],
-        ports={"80/tcp": 80},
+        ports={
+            "80/tcp": 80,
+            "443/tcp": 443,
+        },
         volumes=[
             "/var/run/docker.sock:/var/run/docker.sock",
-            f"{TRAEFIK_VOLUME}:/traefik"
+            f"{TRAEFIK_VOLUME}:/traefik",
+            f"{TRAEFIK_CERTS}:/letsencrypt",
         ],
     )
 
