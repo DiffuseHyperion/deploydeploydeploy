@@ -3,7 +3,7 @@ import dotenv, os
 from fastapi import Response, APIRouter, Depends, status
 from pydantic import BaseModel
 
-import app.lib.dependencies as dependencies
+from app.lib import dependencies
 from app import main
 
 router = APIRouter(
@@ -28,6 +28,7 @@ async def set_project_env_variable(
     dotenv.set_key(os.path.join(project.project_path, ".env"), body.key, body.value)
     cursor.execute("INSERT into environments VALUES (?, ?, ?) ON CONFLICT (id, key) DO UPDATE SET value = ?", (project_id, body.key, body.value, body.value))
     main.connection.commit()
+    cursor.close()
     return {
         "key": body.key,
         "value": body.value,
@@ -51,6 +52,7 @@ async def delete_project_env_variable(
         dotenv.unset_key(os.path.join(project.project_path, ".env"), body.key)
         cursor.execute("DELETE FROM environments WHERE id = ? AND key = ?", [project_id, body.key])
         main.connection.commit()
+    cursor.close()
     return {
         "key": body.key,
     }

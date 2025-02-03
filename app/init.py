@@ -73,6 +73,7 @@ def synchronize_projects():
                     pass
             for key, value in env_vars:
                 dotenv.set_key(str(env_path), key, value)
+    cursor.close()
 
 def create_projects() -> dict[str, Project]:
     """

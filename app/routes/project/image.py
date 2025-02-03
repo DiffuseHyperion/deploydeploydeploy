@@ -1,7 +1,7 @@
 from fastapi import Response, APIRouter, Depends, status
 from docker.errors import ImageNotFound
 
-import app.lib.dependencies as dependencies
+from app.lib import dependencies
 from app import main
 from app.lib import nixpacks
 
