@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import Response, APIRouter, Depends, status
 from pydantic import BaseModel
 
@@ -49,4 +51,46 @@ async def set_project_port(
     return {
         "project_id": project_id,
         "domain": body.domain,
+    }
+
+class SetProjectRemoteModel(BaseModel):
+    remote: str
+
+@router.put("/remote")
+async def set_project_branch(
+        project_id: str,
+        body: SetProjectRemoteModel,
+        response: Response,
+):
+    if (main.projects.get(project_id)) is None:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return f"Could not find project {project_id}"
+    cursor = main.connection.cursor()
+    cursor.execute("UPDATE projects SET git_url = ? WHERE id = ?", (body.remote, project_id))
+    main.connection.commit()
+    cursor.close()
+    return {
+        "project_id": project_id,
+        "remote": body.remote,
+    }
+
+class SetProjectBranchModel(BaseModel):
+    branch: str
+
+@router.put("/branch")
+async def set_project_branch(
+        project_id: str,
+        body: SetProjectBranchModel,
+        response: Response,
+):
+    if (main.projects.get(project_id)) is None:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return f"Could not find project {project_id}"
+    cursor = main.connection.cursor()
+    cursor.execute("UPDATE projects SET branch = ? WHERE id = ?", (body.branch, project_id))
+    main.connection.commit()
+    cursor.close()
+    return {
+        "project_id": project_id,
+        "branch": body.branch,
     }
