@@ -4,19 +4,19 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: deploydeploydeploy
-    restart: unless-stopped
+    restart: no
     environment:
       ENABLE_DOCS: true
-      TRAEFIK_NETWORK: deploy*3
+      TRAEFIK_NETWORK: deploydeploydeploy
       TRAEFIK_HTTP_ENTRYPOINT: http
-      DATA_FILE: /deploy*3/data.sqlite
-      PROJECT_DIR: /deploy*3/projects
+      DATA_FILE: /deploydeploydeploy/data/data.sqlite
+      PROJECT_DIR: /deploydeploydeploy/data/projects
       SECRET_KEY: CHANGEME
     ports:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./run:/deploy*3"
+      - "./run:/deploydeploydeploy/data"
   traefik:
     image: traefik:latest
     container_name: deploydeploydeploy-traefik
@@ -31,4 +31,4 @@ services:
       - "./run/traefik:/traefik"
 networks:
   default:
-    name: deploy*3
+    name: deploydeploydeploy

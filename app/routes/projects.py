@@ -15,6 +15,7 @@ router = APIRouter(
 
 class CreateProjectModel(BaseModel):
     git_url: str
+    branch: str
 
 @router.post("/")
 async def create_project(
@@ -23,7 +24,7 @@ async def create_project(
 ):
     project_uuid: str = str(uuid.uuid4())
 
-    exit_code, output = git.clone_repo(body.git_url, os.path.join(PROJECT_DIR, project_uuid))
+    exit_code, output = git.clone_repo_branch(body.git_url, body.branch, os.path.join(PROJECT_DIR, project_uuid))
     if exit_code != 0:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {
@@ -32,6 +33,9 @@ async def create_project(
         }
     else:
         main.projects.update({project_uuid: Project(project_uuid)})
+        cursor = main.connection.cursor()
+        cursor.execute("INSERT INTO projects (id, git_url, branch, port, domain) VALUES (?, ?, ?, ?, ?)",
+                       [project_uuid, body.git_url, body.branch, 3000, "localhost"])
         return {
             "project_uuid": project_uuid,
         }

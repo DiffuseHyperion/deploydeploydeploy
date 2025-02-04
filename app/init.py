@@ -50,22 +50,26 @@ def synchronize_projects():
         path_ids.append(project_id)
         if project_id not in db_ids:
             warnings.warn(f"A project folder with the ID {project_id} is not in the database. Adding it to the database now.")
-            exit_code, output = git.get_remote(project_path)
+            exit_code, remote = git.get_remote(project_path)
             if exit_code != 0:
                 warnings.warn(f"Could not find the remote url to project {project_id}. Assuming there is no remote.")
-                output = None
-            cursor.execute("INSERT INTO projects (id, git_url, port, domain) VALUES (?, ?, ?, ?)",
-                           [project_id, output, 3000, "localhost"])
+                remote = None
+            exit_code, branch = git.get_branch(project_path)
+            if exit_code != 0:
+                warnings.warn(f"Could not find the branch name to project {project_id}. Assuming it is 'main'.")
+                branch = "main"
+            cursor.execute("INSERT INTO projects (id, git_url, branch, port, domain) VALUES (?, ?, ?, ?, ?)",
+                           [project_id, remote, branch, 3000, "localhost"])
             env_vars = dotenv.dotenv_values(os.path.join(project_path, ".env"))
             for key, value in env_vars.items():
-                cursor.execute("INSERT INTO environments (id, key, value) VALUES (?, ?, ?)", [project_id, key, value])
+                cursor.execute("INSERT OR IGNORE INTO environments (id, key, value) VALUES (?, ?, ?)", [project_id, key, value])
     main.connection.commit()
 
     for db_id in db_ids:
         if db_id not in path_ids:
             warnings.warn(f"Could not find project {db_id}'s files. Cloning it now.")
-            git_url = cursor.execute("SELECT git_url FROM projects WHERE id = ?", [db_id]).fetchone()[0]
-            git.clone_repo(git_url, str(os.path.join(PROJECT_DIR, db_id)))
+            git_url, branch = cursor.execute("SELECT git_url, branch FROM projects WHERE id = ?", [db_id]).fetchone()
+            git.clone_repo_branch(git_url, branch, str(os.path.join(PROJECT_DIR, db_id)))
             env_vars = cursor.execute("SELECT key, value FROM environments WHERE id = ?", [db_id]).fetchall()
             env_path = os.path.join(PROJECT_DIR, db_id, ".env")
             if len(env_vars) > 0 and not os.path.exists(env_path):
@@ -90,7 +94,7 @@ def initialize_database():
     Creates database tables if they don't exist.
     """
     cursor = main.connection.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, git_url TEXT, port INTEGER, domain TEXT)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY, git_url TEXT, branch TEXT, port INTEGER, domain TEXT)")
     cursor.execute("CREATE TABLE IF NOT EXISTS environments(id TEXT, key TEXT, value TEXT, FOREIGN KEY (id) REFERENCES projects(id) PRIMARY KEY (id, key))")
     cursor.close()
 
