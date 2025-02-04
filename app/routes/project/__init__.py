@@ -1,1 +1,1 @@
-from app.routes.project import container, environment, image, project, settings
+from app.routes.project import container, environment, image, project, settings, deploy

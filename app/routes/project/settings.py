@@ -36,7 +36,7 @@ class SetProjectDomainModel(BaseModel):
     domain: str
 
 @router.put("/domain")
-async def set_project_port(
+async def set_project_domain(
         project_id: str,
         body: SetProjectDomainModel,
         response: Response,

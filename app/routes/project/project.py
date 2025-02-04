@@ -28,23 +28,7 @@ async def update_project(
     if (project := main.projects.get(project_id)) is None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return f"Could not find project {project_id}"
-    exit_code, response = git.fetch(project.project_path)
-    if exit_code != 0:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {
-            "error": "Could not fetch latest commit",
-            "response": response
-        }
-    exit_code, response = git.reset_hard(project.project_path)
-    if exit_code != 0:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {
-            "error": "Could not fetch latest commit",
-            "response": response
-        }
-    return {
-        "project_id": project_id,
-    }
+    return project.invoke_method(project.update_project, response)
 
 # taken mostly from https://github.com/gitpython-developers/GitPython/blob/main/git/util.py#L212
 def handler(function, path, _excinfo):
