@@ -21,6 +21,7 @@ import app.init as init
 
 if len(result := init.check_programs()) > 0:
     raise RuntimeError(f"The following programs are not installed: {", ".join(result)}")
+init.check_volumes()
 init.initialize_database()
 init.synchronize_projects()
 projects: dict[str, Project] = init.create_projects()

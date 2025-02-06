@@ -98,3 +98,12 @@ def initialize_database():
     cursor.execute("CREATE TABLE IF NOT EXISTS environments(id TEXT, key TEXT, value TEXT, FOREIGN KEY (id) REFERENCES projects(id) PRIMARY KEY (id, key))")
     cursor.close()
 
+def check_volumes():
+    """
+    Checks volume structure.
+    For now, this just creates the projects folder if it doesn't exist.
+    """
+    if not os.path.exists(PROJECT_DIR):
+        warnings.warn(f"Project directory does not exist. Creating it now.")
+        with open(PROJECT_DIR, "w") as _:
+            pass
