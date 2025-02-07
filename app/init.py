@@ -105,5 +105,4 @@ def check_volumes():
     """
     if not os.path.exists(PROJECT_DIR):
         warnings.warn(f"Project directory does not exist. Creating it now.")
-        with open(PROJECT_DIR, "w") as _:
-            pass
+        os.makedirs(PROJECT_DIR)
