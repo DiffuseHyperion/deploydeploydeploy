@@ -60,9 +60,11 @@ def synchronize_projects():
                 branch = "main"
             cursor.execute("INSERT INTO projects (id, git_url, branch, port, domain) VALUES (?, ?, ?, ?, ?)",
                            [project_id, remote, branch, 3000, "localhost"])
-            env_vars = dotenv.dotenv_values(os.path.join(project_path, ".env"))
-            for key, value in env_vars.items():
-                cursor.execute("INSERT OR IGNORE INTO environments (id, key, value) VALUES (?, ?, ?)", [project_id, key, value])
+
+        env_vars = dotenv.dotenv_values(os.path.join(project_path, ".env"))
+        for key, value in env_vars.items():
+            cursor.execute("INSERT into environments VALUES (?, ?, ?) ON CONFLICT (id, key) DO UPDATE SET value = ?",
+                           (project_id, key, value, value))
     main.connection.commit()
 
     for db_id in db_ids:
