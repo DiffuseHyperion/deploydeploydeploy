@@ -1,4 +1,6 @@
 import os
+import subprocess
+import threading
 from typing import Tuple, Dict, Callable
 
 import docker.errors
@@ -17,12 +19,14 @@ class Project(object):
     project_path: str
     running: bool
     built: bool
+    build_process: subprocess.Popen | None
 
     def __init__(self, project_id: str):
         self.project_id = project_id
         self.project_path = os.path.join(PROJECT_DIR, project_id)
         self.running = len(main.client.containers.list(filters={'name': project_id})) > 0
         self.built = len(main.client.images.list(filters={'reference': project_id})) > 0
+        self.build_process = None
 
     def invoke_method(self, method: Callable[[], Tuple[int, str] | None], response: fastapi.Response) -> Dict:
         if (error := method()) is None:
@@ -39,6 +43,16 @@ class Project(object):
         exit_code, output = nixpacks.build_image(self.project_id, self.project_path)
         self.built = True
         return None if exit_code == 0 else (500, output)
+
+    def start_image_build(self) -> Tuple[int, str] | None:
+        if self.build_process is not None:
+            return 400, f"A build process for project {self.project_id} was already started."
+        self.build_process = nixpacks.build_image_async(self.project_id, self.project_path)
+        def on_exit():
+            self.build_process.wait()
+            self.build_process = None
+            self.built = True
+        threading.Thread(target=on_exit).start()
 
     def delete_image(self) -> Tuple[int, str] | None:
         try:

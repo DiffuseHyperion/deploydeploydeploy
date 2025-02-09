@@ -14,7 +14,7 @@ router = APIRouter(
 class SetProjectPortModel(BaseModel):
     port: int
 
-@router.put("/port")
+@router.put("/port/")
 async def set_project_port(
         project_id: str,
         body: SetProjectPortModel,
@@ -35,7 +35,7 @@ async def set_project_port(
 class SetProjectDomainModel(BaseModel):
     domain: str
 
-@router.put("/domain")
+@router.put("/domain/")
 async def set_project_domain(
         project_id: str,
         body: SetProjectDomainModel,
@@ -56,7 +56,7 @@ async def set_project_domain(
 class SetProjectBranchModel(BaseModel):
     branch: str
 
-@router.put("/branch")
+@router.put("/branch/")
 async def set_project_branch(
         project_id: str,
         body: SetProjectBranchModel,

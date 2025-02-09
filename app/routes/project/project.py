@@ -18,7 +18,13 @@ async def get_project(
     if (project := main.projects.get(project_id)) is None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return f"Could not find project {project_id}"
-    return project
+    return {
+        "project_id": project.project_id,
+        "project_path": project.project_path,
+        "running": project.running,
+        "built": project.built,
+        "build_process": False if project.build_process is None else True
+    }
 
 @router.put("/")
 async def update_project(

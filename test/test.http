@@ -1,0 +1,94 @@
+### Get all projects
+GET http://{{host}}:{{port}}/api/v1/projects/
+Authorization: {{key}}
+Accept: application/json
+### Create new project
+POST http://{{host}}:{{port}}/api/v1/projects/
+Authorization: {{key}}
+Content-Type: application/json
+
+{
+	"git_url": "https://git.diffusehyperion.com/dohack.me/dohack.me.git",
+	"branch": "master"
+}
+### Get project
+GET http://{{host}}:{{port}}/api/v1/{{project_id}}/
+Authorization: {{key}}
+Accept: application/json
+### Update project
+PUT http://{{host}}:{{port}}/api/v1/{{project_id}}/
+Authorization: {{key}}
+Accept: application/json
+### Delete project
+DELETE http://{{host}}:{{port}}/api/v1/{{project_id}}/
+Authorization: {{key}}
+Accept: application/json
+### Create project container
+POST http://{{host}}:{{port}}/api/v1/{{project_id}}/container/
+Authorization: {{key}}
+Accept: application/json
+### Delete project Container
+DELETE http://{{host}}:{{port}}/api/v1/{{project_id}}/container/
+Authorization: {{key}}
+Accept: application/json
+### Set project environment variable
+PUT http://{{host}}:{{port}}/api/v1/{{project_id}}/environment/
+Authorization: {{key}}
+Content-Type: application/json
+
+{
+  "key": "test",
+  "value": "hello world"
+}
+### Delete project environment variable
+DELETE http://{{host}}:{{port}}/api/v1/{{project_id}}/environment/
+Authorization: {{key}}
+Content-Type: application/json
+
+{
+  "key": "test"
+}
+### Build project image
+PUT http://{{host}}:{{port}}/api/v1/{{project_id}}/image/
+Authorization: {{key}}
+Accept: application/json
+### Start building project image
+PUT http://{{host}}:{{port}}/api/v1/{{project_id}}/image/async/
+Authorization: {{key}}
+Accept: application/json
+### Stream project image build output
+WEBSOCKET ws://{{host}}:{{port}}/api/v1/{{project_id}}/image/ws/
+Authorization: {{key}}
+Content-Type: text/plain
+### Delete project image
+DELETE http://{{host}}:{{port}}/api/v1/{{project_id}}/image/
+Authorization: {{key}}
+Accept: application/json
+### Set project port
+PUT http://{{host}}:{{port}}/api/v1/{{project_id}}/settings/port/
+Authorization: {{key}}
+Content-Type: application/json
+
+{
+  "port": 3000
+}
+### Set project domain
+PUT http://{{host}}:{{port}}/api/v1/{{project_id}}/settings/domain/
+Authorization: {{key}}
+Content-Type: application/json
+
+{
+  "domain": "localhost"
+}
+### Set project branch
+PUT http://{{host}}:{{port}}/api/v1/{{project_id}}/settings/branch/
+Authorization: {{key}}
+Content-Type: application/json
+
+{
+  "branch": "master"
+}
+### Begin project deploy
+PUT https://{{host}}:{{port}}/api/v1/{{project_id}}/deploy/
+Authorization: {{key}}
+Content-Type: application/json

@@ -42,4 +42,10 @@ async def create_project(
 
 @router.get("/")
 async def get_projects():
-    return main.projects
+    return {key: {
+        "project_id": project.project_id,
+        "project_path": project.project_path,
+        "running": project.running,
+        "built": project.built,
+        "build_process": False if project.build_process is None else True
+    } for key, project in main.projects.items()}
