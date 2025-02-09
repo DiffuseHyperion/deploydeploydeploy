@@ -26,7 +26,10 @@ async def get_image_build_logs(
         line = bytes(project.build_process.stdout.readline()).decode("utf-8")
         if line is None or line == "":
             break
-        await websocket.send_text(line)
+        try:
+            await websocket.send_text(line)
+        except WebSocketDisconnect:
+            break
     await websocket.close()
 
 @router.put("/")
