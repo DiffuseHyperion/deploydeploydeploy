@@ -11,6 +11,19 @@ router = APIRouter(
     dependencies=[Depends(dependencies.get_key)],
 )
 
+@router.get("/")
+async def get_project_environment_variables(
+        project_id: str,
+        response: Response,
+):
+    if (project := main.projects.get(project_id)) is None:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return f"Could not find project {project_id}"
+    cursor = main.connection.cursor()
+    result = cursor.execute("SELECT key, value FROM environments WHERE id = ?", [project_id]).fetchall()
+    cursor.close()
+    return {pair[0]: pair[1] for pair in result}
+
 class SetProjectEnvironmentVariableModel(BaseModel):
     key: str
     value: str

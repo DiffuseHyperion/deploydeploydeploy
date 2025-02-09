@@ -31,6 +31,10 @@ Accept: application/json
 DELETE http://{{host}}:{{port}}/api/v1/{{project_id}}/container/
 Authorization: {{key}}
 Accept: application/json
+### Get project environment variables
+GET http://{{host}}:{{port}}/api/v1/{{project_id}}/environment/
+Authorization: {{key}}
+Accept: application/json
 ### Set project environment variable
 PUT http://{{host}}:{{port}}/api/v1/{{project_id}}/environment/
 Authorization: {{key}}
