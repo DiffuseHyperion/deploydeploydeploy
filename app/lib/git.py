@@ -14,10 +14,6 @@ def get_branch(path: str) -> (int, str):
     process = subprocess.run([GIT_PATH, "rev-parse", "--abbrev-ref", "HEAD"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return process.returncode, process.stdout.decode().rstrip()
 
-def fetch(path: str) -> (int, str):
-    process = subprocess.run([GIT_PATH, "fetch"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    return process.returncode, process.stdout.decode().rstrip()
-
-def reset_hard(path: str) -> (int, str):
-    process = subprocess.run([GIT_PATH, "reset", "--hard"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def pull(path: str) -> (int, str):
+    process = subprocess.run([GIT_PATH, "pull"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return process.returncode, process.stdout.decode().rstrip()

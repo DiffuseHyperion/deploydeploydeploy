@@ -117,12 +117,9 @@ class Project(object):
             return 500, f"Could not communicate with Docker API"
 
     def update_project(self) -> Tuple[int, str] | None:
-        exit_code, response = git.fetch(self.project_path)
+        exit_code, response = git.pull(self.project_path)
         if exit_code != 0:
-            return 500, "Could not fetch latest commit"
-        exit_code, response = git.reset_hard(self.project_path)
-        if exit_code != 0:
-            return 500, "Could not hard reset to latest commit"
+            return 500, "Could not pull latest commit"
         return None
 
     def deploy_project(self) -> Tuple[int, str] | None:
